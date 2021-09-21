@@ -1,0 +1,29 @@
+{
+  "name": "lottery-sol",
+  "version": "0.0.1",
+  "description": "Created by Soprox",
+  "main": "index.js",
+  "testnetDefaultChannel": "v1.6.9",
+  "scripts": {
+    "start": "node ./client/index.js",
+    "program:build": "cargo build-bpf --manifest-path=./program/Cargo.toml --bpf-out-dir=dist",
+    "program:deploy": "solana program deploy ./dist/main.so"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DescartesNetwork/soprox.git"
+  },
+  "author": "Tu Phan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DescartesNetwork/soprox/issues"
+  },
+  "homepage": "https://github.com/DescartesNetwork/soprox#readme",
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^0.87.0",
+    "soprox-abi": "0.0.13",
+    "yaml": "^1.10.2"
+  },
+  "devDependencies": {}
+}
