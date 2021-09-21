@@ -6,7 +6,7 @@ use std::convert::TryInto;
 pub enum AppInstruction {
     Init {
         entry_fees: u32,
-        initializers_commission: u8,
+        commission_rate: u8,
     },
     Participate,
     PickWinner,
@@ -25,7 +25,7 @@ impl AppInstruction {
                     .map(u32::from_le_bytes)
                     .ok_or(AppError::InvalidInstruction)?;
 
-                let initializers_commission = rest
+                let commission_rate = rest
                     .get(4..5)
                     .and_then(|slice| slice.try_into().ok())
                     .map(u8::from_le_bytes)
@@ -33,7 +33,7 @@ impl AppInstruction {
 
                 Self::Init {
                     entry_fees,
-                    initializers_commission,
+                    commission_rate,
                 }
             }
             1 => Self::Participate,

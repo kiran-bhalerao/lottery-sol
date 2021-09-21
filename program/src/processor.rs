@@ -37,7 +37,7 @@ impl Processor {
         match instruction {
             AppInstruction::Init {
                 entry_fees,
-                initializers_commission,
+                commission_rate,
             } => {
                 let accounts_iter = &mut accounts.iter();
                 let initializer_account = next_account_info(accounts_iter)?;
@@ -53,7 +53,7 @@ impl Processor {
 
                 let mut data = Lottery::unpack(&lottery_account.data.borrow())?;
                 data.entry_fees = entry_fees;
-                data.initializers_commission = initializers_commission;
+                data.commission_rate = commission_rate;
                 data.initializer = initializer_account.key.to_bytes();
                 data.participants = [[0; 32]; MAX_PARTICIPANT];
 
@@ -185,17 +185,18 @@ impl Processor {
                 let lottery_amount =
                     sol_to_lamports((data.participants.len() as f64) * (data.entry_fees as f64));
 
-                // lottery initializer will get this initializers_commission entry_fees as commission for organizing the lottery from winner
-                let fees_amount = lottery_amount * (data.initializers_commission as u64) / 100;
+                // lottery initializer will get this commission_rate entry_fees as commission for organizing the lottery from winner
+                let commission_amount = lottery_amount * (data.commission_rate as u64) / 100;
                 let remaining_amount = account_lamports - lottery_amount;
 
                 // transfer lottery entry_fees to winner
                 **lottery_account.try_borrow_mut_lamports()? -= account_lamports;
                 **winner_account.unwrap().try_borrow_mut_lamports()? +=
-                    lottery_amount - fees_amount;
+                    lottery_amount - commission_amount;
 
                 // transfer remaining entry_fees to lottery initializer
-                **initializer_account.try_borrow_mut_lamports()? += remaining_amount + fees_amount;
+                **initializer_account.try_borrow_mut_lamports()? +=
+                    remaining_amount + commission_amount;
 
                 // clear account data
                 *lottery_account.data.borrow_mut() = &mut [];

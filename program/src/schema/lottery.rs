@@ -14,8 +14,8 @@ pub const MAX_PARTICIPANT: usize = 2;
 //
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Lottery {
-    pub entry_fees: u32, // Participant has to pay this much to enter in Lottery
-    pub initializers_commission: u8, // Percentage Reward for Lottery Organizer from Winner
+    pub entry_fees: u32,       // Participant has to pay this much to enter in Lottery
+    pub commission_rate: u8,   // Percentage Reward for Lottery Organizer from Winner
     pub initializer: [u8; 32], // Lottery Organizer, has to pay initial lamps for Lottery account creation
     pub participants: [[u8; 32]; MAX_PARTICIPANT], // Array of MAX_PARTICIPANT no of Participants pubkeys
 }
@@ -43,7 +43,7 @@ impl Pack for Lottery {
 
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         let src = array_ref![src, 0, Lottery::LEN];
-        let (entry_fees, initializers_commission, initializer, participants) =
+        let (entry_fees, commission_rate, initializer, participants) =
             array_refs![src, 4, 1, 32, 32 * MAX_PARTICIPANT];
 
         let participants: [[u8; 32]; MAX_PARTICIPANT] = participants
@@ -61,7 +61,7 @@ impl Pack for Lottery {
 
         Ok(Lottery {
             entry_fees: u32::from_le_bytes(*entry_fees),
-            initializers_commission: u8::from_be_bytes(*initializers_commission),
+            commission_rate: u8::from_be_bytes(*commission_rate),
             initializer: *initializer,
             participants,
         })
@@ -75,7 +75,7 @@ impl Pack for Lottery {
 
         let &Lottery {
             entry_fees,
-            initializers_commission,
+            commission_rate,
             initializer,
             participants,
         } = self;
@@ -89,7 +89,7 @@ impl Pack for Lottery {
             .expect("error:: convert Vec to slice");
 
         *dst_amount = entry_fees.to_le_bytes();
-        *dst_fees = initializers_commission.to_le_bytes();
+        *dst_fees = commission_rate.to_le_bytes();
         *dst_initializer = initializer;
         *dst_participants = participants;
     }

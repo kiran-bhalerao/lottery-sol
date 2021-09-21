@@ -15,8 +15,12 @@ const MAX_PARTICIPANT = 2;
 
 const LOTTERY_ACCOUNT_SCHEMA = [
   {
-    key: "amount",
+    key: "entry_fees",
     type: "u32",
+  },
+  {
+    key: "commission_rate",
+    type: "u8",
   },
   {
     key: "initializer",
@@ -34,7 +38,7 @@ class Lottery {
     this.connection = new Connection(nodeUrl, "recent");
   }
 
-  rentLotteryAccount = async (payer) => {
+  async rentLotteryAccount(payer) {
     const account = new Account();
     // Compute needed space for a Lottery account
     const layout = new soproxABI.struct(LOTTERY_ACCOUNT_SCHEMA);
@@ -60,9 +64,9 @@ class Lottery {
       { skipPreflight: true, commitment: "recent" }
     );
     return account;
-  };
+  }
 
-  getLottery = async (lotteryAddress) => {
+  async getLottery(lotteryAddress) {
     const lotteryPublicKey = new PublicKey(lotteryAddress);
     // Get raw data
     const res = await this.connection.getAccountInfo(lotteryPublicKey);
@@ -72,7 +76,7 @@ class Lottery {
     layout.fromBuffer(data);
     // Return the result
     return layout.value;
-  };
+  }
 
   async sendTransaction(instruction, payer) {
     const transaction = new Transaction();
@@ -88,15 +92,16 @@ class Lottery {
     return txId;
   }
 
-  initLottery = async (helloAddress, payer) => {
+  async initLottery(helloAddress, payer) {
     const helloPublicKey = new PublicKey(helloAddress);
     // Build input
     const layout = new soproxABI.struct(
       [
         { key: "tag", type: "u8" },
-        { key: "amount", type: "u32" },
+        { key: "entry_fees", type: "u32" },
+        { key: "commission_rate", type: "u8" },
       ],
-      { tag: 0, amount: 1 }
+      { tag: 0, entry_fees: 1, commission_rate: 10 }
     );
 
     const data = layout.toBuffer();
@@ -112,7 +117,7 @@ class Lottery {
     });
 
     return this.sendTransaction(instruction, payer);
-  };
+  }
 
   async participateLottery(lotteryAddress, payer) {
     const lotteryPublicKey = new PublicKey(lotteryAddress);
